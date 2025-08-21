@@ -8,6 +8,7 @@ from typing import Any, Callable, Dict, Iterable, Optional, Sequence, Tuple
 from dotenv import load_dotenv
 
 from utils.prompt_builder import PromptBuilder
+from utils.token_helpers import PricingHelper, TokenCoster
 from src.adapter import OpenAIAdapter
 from src.result_logger import ResultLogger
 from src.trial import TrialConfig, TrialResult
@@ -62,6 +63,10 @@ def run_trial(
     correct = scorer(task_payload["expected"], text)
     created_at = raw.get("created_at") or time.time()
     response_id = raw.get("id", "")
+    pricing_helper = PricingHelper(
+        input_per_1k=TokenCoster.PRICE_PER_1K_INPUT,
+        output_per_1k=TokenCoster.PRICE_PER_1K_OUTPUT
+    )
     result = TrialResult(
         run_id=run_id,
         suite=suite_name,
@@ -77,6 +82,10 @@ def run_trial(
         total_tokens=usage["total_tokens"],
         cached_tokens=usage["cached_tokens"],
         reasoning_tokens=usage["reasoning_tokens"],
+        cost=pricing_helper.estimate(
+            input_tokens=usage["input_tokens"],
+            output_tokens=usage["output_tokens"]
+        ) or 0.0,
         response_id=response_id,
         response_text=text,
         correct=int(correct),

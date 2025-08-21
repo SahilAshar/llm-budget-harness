@@ -30,6 +30,7 @@ class TrialResult:
     total_tokens: int
     cached_tokens: int
     reasoning_tokens: int
+    cost: float
     response_id: str
     response_text: str
     correct: int  # 1/0
