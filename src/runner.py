@@ -76,6 +76,7 @@ def run_trial(
         top_p=config.top_p,
         shots=config.shots,
         cap=config.max_output_tokens,
+        reasoning_effort=config.reasoning_effort,
         latency_ms=latency_ms,
         input_tokens=usage["input_tokens"],
         output_tokens=usage["output_tokens"],
@@ -156,15 +157,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     p.add_argument("--shots_list", type=int, nargs="*", default=[0,2,6,8,10,12,14])
     p.add_argument("--caps_list", type=int, nargs="*", default=[32,64,128,256,512])
     p.add_argument("--reasoning_effort", type=str, default="minimal", choices=["minimal", "low", "medium", "high"])
+    p.add_argument("--math_suite_path", type=str, default=str("data/tasks/math_hard_v1.json"))
+    p.add_argument("--sentiment_suite_path", type=str, default=str("data/sentiment_tasks.json"))
     p.add_argument("--out_dir", type=Path, default=Path("results"))
     p.add_argument("--plot", action="store_true")
     args = p.parse_args(argv)
 
     from src.suites import example_math_suite, example_sentiment_suite
     if args.suite == "math":
-        builder, tasks, scorer = example_math_suite()
+        builder, tasks, scorer = example_math_suite(args.math_suite_path)
     else:
-        builder, tasks, scorer = example_sentiment_suite()
+        builder, tasks, scorer = example_sentiment_suite(args.sentiment_suite_path)
 
     base_cfg = TrialConfig(
         model=args.model,
@@ -177,7 +180,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         tool_choice="none",
     )
 
-    out = args.out_dir / f"{args.suite}_{args.mode}"
+    ts = time.strftime("%Y%m%d-%H%M%S")
+    out = args.out_dir / f"{args.suite}_{args.mode}" / f"{ts}_{args.model}_{args.reasoning_effort}"
     out.mkdir(parents=True, exist_ok=True)
     run_sweep(
         mode=args.mode,
@@ -193,7 +197,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     if args.plot:
         from utils.plot_result import plot_from_csv
-        plot_from_csv(out / "trials.csv", mode=args.mode)
+        plot_from_csv(out, mode=args.mode)
 
     return 0
 

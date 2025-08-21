@@ -24,6 +24,7 @@ class TrialResult:
     top_p: float
     shots: int
     cap: int
+    reasoning_effort: str
     latency_ms: float
     input_tokens: int
     output_tokens: int
