@@ -1,4 +1,5 @@
 from __future__ import annotations
+import json
 from typing import Tuple, Callable, Dict, Any
 from utils.prompt_builder import PromptBuilder
 
@@ -8,32 +9,50 @@ from utils.prompt_builder import PromptBuilder
 
 def score_math(reference: str, model_text: str) -> int:
     # Extract first integer from model_text and compare with expected integer
-    import re
-    m = re.search(r"-?\d+", model_text.strip())
-    if not m:
+    # import re
+    # m = re.search(r"-?\d+", model_text.strip())
+    # if not m:
+    #     return 0
+    # try:
+    #     pred = int(m.group(0))
+    #     return 1 if str(pred) == str(reference).strip() else 0
+    # except Exception:
+    #     return 0
+
+    model_dict: Dict[str, str] = json.loads(model_text.strip().lower())
+    if "result" not in model_dict:
         return 0
     try:
-        pred = int(m.group(0))
+        pred = model_dict["result"]
         return 1 if str(pred) == str(reference).strip() else 0
     except Exception:
         return 0
 
 
 def score_sentiment(reference: str, model_text: str) -> int:
-    norm = model_text.strip().lower()
-    # common aliases
-    mapping = {
-        "pos": "positive", "neg": "negative", "neu": "neutral",
-        "positive": "positive", "negative": "negative", "neutral": "neutral"
-    }
-    for k, v in mapping.items():
-        if norm.startswith(k):
-            norm = v
-            break
-    return 1 if norm == reference.strip().lower() else 0
+    # norm = model_text.strip().lower()
+    # # common aliases
+    # mapping = {
+    #     "pos": "positive", "neg": "negative", "neu": "neutral",
+    #     "positive": "positive", "negative": "negative", "neutral": "neutral"
+    # }
+    # for k, v in mapping.items():
+    #     if norm.startswith(k):
+    #         norm = v
+    #         break
+    # return 1 if norm == reference.strip().lower() else 0
+
+    model_dict: Dict[str, str] = json.loads(model_text.strip().lower())
+    if "result" not in model_dict:
+        return 0
+    try:
+        pred = model_dict["result"]
+        return 1 if str(pred) == str(reference).strip() else 0
+    except Exception:
+        return 0
 
 def example_math_suite() -> Tuple[PromptBuilder, Dict[str, Dict[str, Any]], Callable[[str, str], int]]:
-    system = "You are a careful math assistant. Answer with just the final integer."
+    system = "You are a careful math assistant. Answer with the final integer in the JSON format: {\"result\": <integer>}"
     examples = [
         {"user": "What is 2 + 3?", "assistant": "5"},
         {"user": "What is 10 + 5?", "assistant": "15"},
@@ -49,7 +68,7 @@ def example_math_suite() -> Tuple[PromptBuilder, Dict[str, Dict[str, Any]], Call
 
 
 def example_sentiment_suite() -> Tuple[PromptBuilder, Dict[str, Dict[str, Any]], Callable[[str, str], int]]:
-    system = "You are a sentiment classifier. Output exactly one word: positive, neutral, or negative."
+    system = "You are a sentiment classifier. Output exactly one of the following words (positive, neutral, or negative) in the JSON format: {\"result\": <word>}"
     examples = [
         {"user": "I love this product", "assistant": "positive"},
         {"user": "It's okay, I guess", "assistant": "neutral"},

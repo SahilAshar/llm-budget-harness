@@ -82,10 +82,10 @@ def run_trial(
         total_tokens=usage["total_tokens"],
         cached_tokens=usage["cached_tokens"],
         reasoning_tokens=usage["reasoning_tokens"],
-        cost=pricing_helper.estimate(
-            input_tokens=usage["input_tokens"],
-            output_tokens=usage["output_tokens"]
-        ) or 0.0,
+        price_input_usd=pricing_helper.price_input_tokens_usd(usage["input_tokens"]),
+        price_output_usd=pricing_helper.price_output_tokens_usd(usage["output_tokens"]),
+        price_reasoning_usd=pricing_helper.price_output_tokens_usd(usage["reasoning_tokens"]), # reasoning tokens are charged as output tokens and included in output price
+        total_price_usd=pricing_helper.price_input_tokens_usd(usage["input_tokens"]) + pricing_helper.price_output_tokens_usd(usage["output_tokens"]),
         response_id=response_id,
         response_text=text,
         correct=int(correct),
