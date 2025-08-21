@@ -208,5 +208,8 @@ __marimo__/
 
 # Project Files
 /runs
+/results
+*.png
 output.txt
 prompt.txt
+.vscode/
