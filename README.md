@@ -1,5 +1,3 @@
-# llm-token-harness
-
 # LLM Token Harness — Accuracy, Latency & Cost-Per-Correct
 
 A lightweight, reproducible harness for evaluating LLM configurations across token caps, few-shot counts, and reasoning effort. It logs per-trial accuracy, latency, and token usage, and lets you roll that up into Cost-Per-Correct (CPC) to make more efficient decisions.
