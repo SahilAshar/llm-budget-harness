@@ -1,4 +1,4 @@
-# llm-budget-harness
+# llm-token-harness
 
 # LLM Token Harness — Accuracy, Latency & Cost-Per-Correct
 
